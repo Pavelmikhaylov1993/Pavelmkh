@@ -38,8 +38,9 @@
 | `src/lib/case-schema.ts` | Zod-схема frontmatter, чистая, без `astro:content` |
 | `src/lib/cases.ts` | `getSortedCases()` — единственное место, задающее порядок кейсов |
 | `src/content.config.ts` | коллекция кейсов, расширяет схему полем `cover: image()` |
-| `src/content/cases/*.mdx` | 6 кейсов |
-| `src/assets/cases/<slug>/*` | изображения кейсов |
+| `content/cases/<slug>/index.mdx` | 6 кейсов; картинки лежат рядом, путь `./NN.png` |
+| `content/README.md` | инструкция для человека, правящего тексты |
+| `AGENTS.md` | инструкция для ИИ-агента |
 | `src/assets/pavel.jpg` | портрет |
 | `src/styles/global.css` | Tailwind 4, токены shadcn, вариант `dark` |
 | `src/components/BaseHead.astro` | title, description, OG, canonical, инлайн-скрипт темы |

@@ -63,7 +63,7 @@ async function download(url, destPath) {
 }
 
 async function importCase(page, entry) {
-  const assetsDir = join('src/assets/cases', entry.slug);
+  const assetsDir = join('content/cases', entry.slug);
   await mkdir(assetsDir, { recursive: true });
 
   await page.goto(`${SHARE}/doc/${entry.doc}`, { waitUntil: 'networkidle' });
@@ -87,7 +87,7 @@ async function importCase(page, entry) {
     const ext = EXT_BY_TYPE[contentType.split(';')[0].trim()] ?? 'png';
     const finalPath = join(assetsDir, `${number}.${ext}`);
     await (await import('node:fs/promises')).rename(tempPath, finalPath);
-    localPaths.push(`../../assets/cases/${entry.slug}/${number}.${ext}`);
+    localPaths.push(`./${number}.${ext}`);
     console.log(`  ↓ ${finalPath}`);
   }
 
@@ -113,8 +113,8 @@ async function importCase(page, entry) {
     '',
   ].join('\n');
 
-  await mkdir('src/content/cases', { recursive: true });
-  await writeFile(join('src/content/cases', `${entry.slug}.mdx`), `${frontmatter}${markdown}\n`, 'utf8');
+  
+  await writeFile(join(assetsDir, 'index.mdx'), `${frontmatter}${markdown}\n`, 'utf8');
   console.log(`✓ ${entry.slug} — ${localPaths.length} изображений`);
 }
 

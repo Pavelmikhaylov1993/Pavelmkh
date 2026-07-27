@@ -93,10 +93,12 @@
 
 ```
 astro.config.mjs          site + base, @astrojs/react, @astrojs/mdx, @astrojs/sitemap
+content/                  ВЕСЬ контент, вынесен из src/ — сюда ходит человек, правящий тексты
+  README.md               инструкция для человека: как править и добавлять кейсы
+  cases/<slug>/index.mdx  6 кейсов, картинки лежат в той же папке, путь ./NN.png
+AGENTS.md                 инструкция для ИИ-агента: устройство, ограничения, ловушки
 src/
   content.config.ts       Content Layer: glob loader + Zod-схема
-  content/cases/*.mdx     6 кейсов
-  assets/cases/<slug>/    изображения (astro:assets → оптимизация sharp)
   styles/global.css       @import "tailwindcss"; @theme; CSS-переменные shadcn
   lib/site.ts             профиль, контакты, метрики — единый источник
   lib/utils.ts            cn(), withBase()
