@@ -2,12 +2,10 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Hero from '@/components/Hero.astro';
 import CaseGrid from '@/components/CaseGrid.astro';
-import Contacts from '@/components/Contacts.astro';
 import { site } from '@/lib/site';
 ---
 
 <BaseLayout title={`${site.name} — ${site.role}`} description={site.description}>
   <Hero />
   <CaseGrid />
-  <Contacts />
 </BaseLayout>

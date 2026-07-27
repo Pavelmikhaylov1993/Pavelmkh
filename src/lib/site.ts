@@ -10,11 +10,6 @@ export const site = {
   description:
     'Senior Product Designer. B2B и B2C продукты: монетизация, CRM, маркетплейсы, EdTech. ' +
     'Проектирую на основе исследований и продуктовых метрик.',
-  metrics: [
-    { value: '+10%', label: 'ARPPU' },
-    { value: '+7%', label: 'просмотров объявлений' },
-    { value: '+50%', label: 'скорость внутренних процессов' },
-  ],
   contacts: [
     { label: 'Телеграм', href: 'https://t.me/Pavelmkh' },
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/pavel-mikhaylov93/' },

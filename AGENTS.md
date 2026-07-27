@@ -30,7 +30,7 @@ PLAYWRIGHT_BASE_URL=https://nkonovalov1990.github.io/Pavelmkh/ npm run test:e2e
 ```
 content/cases/<slug>/index.mdx   контент кейса; картинки лежат рядом, путь ./NN.png
 content/README.md                инструкция для человека, правящего тексты
-src/lib/site.ts                  профиль: имя, био, метрики, контакты. Единственный источник
+src/lib/site.ts                  профиль: имя, роль, био, описание, контакты. Единственный источник
 src/lib/case-schema.ts           Zod-схема frontmatter. Чистая, без astro:content
 src/lib/cases.ts                 getSortedCases() — единственное место, задающее порядок кейсов
 src/lib/utils.ts                 cn(), withBase() — единственное знание о base path
@@ -40,10 +40,14 @@ src/components/react/            ThemeToggle и Lightbox — единствен�
 src/components/ui/               примитивы shadcn, положены руками
 src/layouts/                     BaseLayout и CaseLayout
 src/pages/                       index, case/[...slug], 404
+public/                          CV в PDF, og-default.png, robots.txt
 scripts/import-yonote.mjs        разовый импорт из вики. Уже отработал, в проде не нужен
+scripts/make-og.mjs              генерит public/og-default.png из портрета. Запускать вручную
 docs/superpowers/                спека с критериями приёмки AC-1…AC-29 и план реализации
 .superpowers/sdd/progress.md     журнал: что и почему решено, находки всех ревью
 ```
+
+Ни один из скриптов не заведён в `npm run` — оба разовые, зовутся через `node`.
 
 Границы: `site.ts` не знает про компоненты, контент не знает про вёрстку, компоненты
 получают данные пропсами. Данные из коллекции собирают только страницы в `src/pages/`.
@@ -180,6 +184,23 @@ console.log(Object.entries(l.packages).filter(([k,v])=>k!=='' && v.version===und
 Проверяй конкретные значения, а не факт наличия. `toHaveText('Информация о клиенте в чатах')`
 вместо `toBeVisible()`.
 
+### Известные слабые тесты, до которых руки не дошли
+
+Финальное ревью нашло ещё несколько таких же, но чинить их не стали — решение человека,
+не забывчивость. Если правишь эти файлы, заодно можешь закрыть:
+
+- `tests/e2e/seo.spec.ts`, «AC-15: шапка помещается на мобильном» — шапку не проверяет
+  вообще, меряет ширину документа. Это дубликат `AC-13` из `responsive.spec.ts` с чужой
+  этикеткой, и он гоняется в том числе на десктопе, где слово «на мобильном» просто неверно.
+- `tests/e2e/case-page.spec.ts`, `AC-10` — проверки `not.toBeEmpty()` у `case-role` и
+  `case-outcome` не могут покраснеть: непустоту гарантирует Zod-схема. Соседние проверки
+  заголовка и компании настоящие, эти две просто шумят.
+- `tests/unit/content.test.ts`, `AC-4` про `alt` — регулярка ловит только markdown-синтаксис
+  `![](…)`. Если картинку в MDX запишут тегом, список совпадений станет пустым, цикл не
+  выполнится ни разу и тест будет зелёным. Лечится одной строкой `expect(images.length).toBeGreaterThan(0)`.
+- `tests/e2e/theme.spec.ts`, `AC-17` — утверждает только отсутствие класса, прошёл бы и при
+  полностью удалённом `ThemeScript`. Спасает соседний `AC-18`, который утверждает обратное.
+
 ---
 
 ## Осознанные решения, которые не надо «чинить»
@@ -204,4 +225,7 @@ console.log(Object.entries(l.packages).filter(([k,v])=>k!=='' && v.version===und
 зелёных unit и e2e. `ci.yml` гоняет тот же набор на pull request — на push в main он
 намеренно не висит, чтобы не дублировать работу деплоя.
 
-При падении e2e отчёт Playwright сохраняется артефактом на 7 дней.
+При падении e2e отчёт Playwright сохраняется артефактом на 7 дней. Для этого в
+`playwright.config.ts` в CI включены **два** репортера — `github` и `html`. Не сокращай
+до одного `github`: он не создаёт папку `playwright-report/`, и шаг выгрузки артефакта
+будет молча писать «No files were found» каждый раз, когда отчёт как раз и нужен.
