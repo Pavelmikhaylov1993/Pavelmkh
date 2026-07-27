@@ -1,0 +1,36 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { withBase } from '@/lib/utils';
+
+interface Props {
+  entry: CollectionEntry<'cases'>;
+}
+
+const { entry } = Astro.props;
+const { title, company, summary, outcome, cover } = entry.data;
+const href = withBase(`/case/${entry.id}/`);
+---
+
+<article class="h-full">
+  <a href={href} class="flex h-full flex-col overflow-hidden rounded-xl border transition hover:bg-accent">
+    {/* alt пустой намеренно: картинка лежит внутри ссылки, где компания и заголовок
+        уже есть текстом. Непустой alt заставил бы скринридер озвучить их дважды.
+        Ширины считаны от реальной карточки: контейнер max-w-5xl с gap-6 даёт ~484px
+        на десктопе, поэтому 1000w нужен для retina. */}
+    <Image
+      src={cover}
+      alt=""
+      widths={[400, 800, 1000]}
+      sizes="(min-width: 1024px) 484px, (min-width: 768px) 45vw, 100vw"
+      format="avif"
+      class="aspect-16/10 w-full border-b bg-muted object-cover"
+    />
+    <div class="flex flex-1 flex-col p-5">
+      <p class="text-sm text-muted-foreground">{company}</p>
+      <h3 class="mt-1 text-lg font-medium">{title}</h3>
+      <p class="mt-2 text-sm text-muted-foreground">{summary}</p>
+      <p class="mt-4 pt-4 text-sm font-medium border-t">{outcome}</p>
+    </div>
+  </a>
+</article>

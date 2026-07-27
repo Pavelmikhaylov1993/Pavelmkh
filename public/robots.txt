@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nkonovalov1990.github.io/Pavelmkh/sitemap-index.xml

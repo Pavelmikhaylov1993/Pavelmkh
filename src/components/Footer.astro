@@ -1,0 +1,39 @@
+---
+import { site } from '@/lib/site';
+import { withBase } from '@/lib/utils';
+---
+
+<!--
+  Контакты продублированы здесь намеренно. Ссылку на конкретный кейс отправляют
+  коллеге, и человек, пришедший по ней, попадает не на главную — без подвала
+  связаться со страницы кейса было бы нечем.
+  Внешние URL идут как есть: withBase() их ломает, она не проверяет протокол.
+-->
+<footer class="mt-16 border-t py-10">
+  <div class="mx-auto flex max-w-5xl flex-col gap-2 px-4 sm:flex-row sm:items-center sm:justify-between">
+    <p class="text-sm text-muted-foreground">{site.name} — {site.role}</p>
+
+    <ul class="flex flex-wrap items-center gap-x-5 text-sm">
+      {site.contacts.map((contact) => (
+        <li>
+          <a
+            href={contact.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex min-h-11 items-center text-muted-foreground hover:text-foreground"
+          >
+            {contact.label}
+          </a>
+        </li>
+      ))}
+      <li>
+        <a
+          href={withBase(site.cvFile)}
+          class="flex min-h-11 items-center text-muted-foreground hover:text-foreground"
+        >
+          Резюме
+        </a>
+      </li>
+    </ul>
+  </div>
+</footer>

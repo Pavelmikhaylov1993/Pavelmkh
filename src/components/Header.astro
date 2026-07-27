@@ -1,0 +1,20 @@
+---
+import { ThemeToggle } from '@/components/react/ThemeToggle';
+import { withBase } from '@/lib/utils';
+import { site } from '@/lib/site';
+---
+
+<header class="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
+  <nav class="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
+    <a href={withBase('/')} class="flex min-h-11 items-center font-medium">{site.name}</a>
+    <div class="flex items-center gap-1">
+      <a
+        href={withBase('/#cases')}
+        class="flex min-h-11 items-center rounded-md px-3 text-sm text-muted-foreground hover:text-foreground"
+      >
+        Кейсы
+      </a>
+      <ThemeToggle client:load />
+    </div>
+  </nav>
+</header>

@@ -1,0 +1,72 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { withBase } from '@/lib/utils';
+import { site } from '@/lib/site';
+import { Lightbox } from '@/components/react/Lightbox';
+
+interface Props {
+  entry: CollectionEntry<'cases'>;
+  prev?: CollectionEntry<'cases'>;
+  next?: CollectionEntry<'cases'>;
+}
+
+const { entry, prev, next } = Astro.props;
+const { title, company, role, outcome, metrics, summary } = entry.data;
+---
+
+<BaseLayout
+  title={`${company} — ${title} · ${site.name}`}
+  description={summary}
+>
+  <article class="mx-auto max-w-3xl px-4 py-12 md:py-16">
+    <a href={withBase('/#cases')} class="text-sm text-muted-foreground hover:text-foreground">
+      ← Все кейсы
+    </a>
+
+    <p data-testid="case-company" class="mt-8 text-sm text-muted-foreground">{company}</p>
+    <h1 class="mt-2 text-3xl font-semibold tracking-tight md:text-5xl">{title}</h1>
+
+    <dl class="mt-8 grid gap-4 border-y py-6 sm:grid-cols-2">
+      <div>
+        <dt class="text-sm text-muted-foreground">Моя роль</dt>
+        <dd data-testid="case-role" class="mt-1">{role.join(', ')}</dd>
+      </div>
+      <div>
+        <dt class="text-sm text-muted-foreground">Результат</dt>
+        <dd data-testid="case-outcome" class="mt-1">{outcome}</dd>
+      </div>
+    </dl>
+
+    {metrics.length > 0 && (
+      <dl class="mt-8 grid gap-6 sm:grid-cols-2">
+        {metrics.map((metric) => (
+          <div>
+            <dt class="text-3xl font-semibold tabular-nums">{metric.value}</dt>
+            <dd class="mt-1 text-sm text-muted-foreground">{metric.label}</dd>
+          </div>
+        ))}
+      </dl>
+    )}
+
+    <div class="prose-case mt-12">
+      <Lightbox client:visible />
+      <slot />
+    </div>
+
+    <nav class="mt-16 flex justify-between gap-4 border-t pt-8 text-sm">
+      {prev ? (
+        <a href={withBase(`/case/${prev.id}/`)} class="hover:underline">
+          ← Предыдущий кейс
+        </a>
+      ) : (
+        <span></span>
+      )}
+      {next && (
+        <a href={withBase(`/case/${next.id}/`)} class="text-right hover:underline">
+          Следующий кейс →
+        </a>
+      )}
+    </nav>
+  </article>
+</BaseLayout>

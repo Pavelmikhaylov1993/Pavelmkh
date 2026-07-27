@@ -1,0 +1,21 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { withBase } from '@/lib/utils';
+import { site } from '@/lib/site';
+---
+
+<BaseLayout
+  title={`Страница не найдена — ${site.name}`}
+  description="Такой страницы на сайте нет. Возможно, ссылка устарела."
+>
+  <section class="mx-auto max-w-3xl px-4 py-24 text-center">
+    <h1 class="text-5xl font-semibold tracking-tight">404</h1>
+    <p class="mt-4 text-muted-foreground">Такой страницы нет. Возможно, ссылка устарела.</p>
+    <a
+      href={withBase('/')}
+      class="mt-8 inline-flex min-h-11 items-center rounded-md border px-5 hover:bg-accent"
+    >
+      На главную
+    </a>
+  </section>
+</BaseLayout>
