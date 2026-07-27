@@ -13,7 +13,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? 'github' : 'list',
+  // В CI нужны оба: github рисует аннотации прямо в интерфейсе, html кладёт отчёт
+  // в playwright-report/, который workflow забирает артефактом при падении.
+  // С одним только github папки отчёта не появляется и забирать нечего.
+  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: externalBaseURL ?? `http://localhost:${PORT}/Pavelmkh/`,
     trace: 'on-first-retry',
