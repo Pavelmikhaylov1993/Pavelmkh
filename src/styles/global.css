@@ -104,7 +104,9 @@
     border-radius: var(--radius);
     border: 1px solid var(--color-border);
     background-color: var(--color-muted);
-    width: 100%;
+    max-width: 100%;
+    width: auto;
     height: auto;
+    max-height: min(70vh, 900px);
   }
 }
