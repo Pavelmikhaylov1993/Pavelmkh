@@ -17,14 +17,18 @@ const href = withBase(`/case/${entry.id}/`);
     {/* alt пустой намеренно: картинка лежит внутри ссылки, где компания и заголовок
         уже есть текстом. Непустой alt заставил бы скринридер озвучить их дважды.
         Ширины считаны от реальной карточки: контейнер max-w-5xl с gap-6 даёт ~484px
-        на десктопе, поэтому 1000w нужен для retina. */}
+        на десктопе, поэтому 1000w нужен для retina.
+
+        object-top, а не кроп по центру: все обложки построены одинаково — логотип
+        компании сверху, скриншот под ним. Центральный кроп срезает логотип у каждой,
+        а у вертикального скриншота Циана — ещё и всю верхушку экрана. */}
     <Image
       src={cover}
       alt=""
       widths={[400, 800, 1000]}
       sizes="(min-width: 1024px) 484px, (min-width: 768px) 45vw, 100vw"
       format="avif"
-      class="aspect-16/10 w-full border-b bg-muted object-cover"
+      class="aspect-16/10 w-full border-b bg-muted object-cover object-top"
     />
     <div class="flex flex-1 flex-col p-5">
       <p class="text-sm text-muted-foreground">{company}</p>
