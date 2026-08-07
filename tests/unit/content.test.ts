@@ -7,7 +7,9 @@ import { caseMetaSchema } from '@/lib/case-schema';
 const CASES_DIR = 'content/cases';
 
 // Каждый кейс — своя папка с index.mdx и картинками рядом.
+// Английская версия лежит там же под именем index.en.mdx.
 const caseFile = (slug: string) => join(CASES_DIR, slug, 'index.mdx');
+const caseFileEn = (slug: string) => join(CASES_DIR, slug, 'index.en.mdx');
 
 const EXPECTED_SLUGS = [
   'cian-client-info',
@@ -53,6 +55,51 @@ describe('контент кейсов', () => {
   test.each(EXPECTED_SLUGS)('AC-4: у всех изображений в %s непустой alt', (slug) => {
     const body = matter(readFileSync(caseFile(slug), 'utf8')).content;
     const images = [...body.matchAll(/!\[(.*?)\]\((.*?)\)/g)];
+    for (const [, alt] of images) {
+      expect(alt.trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  // Английская версия. Сетка на /en/ строится из тех же шести папок: если у кейса
+  // не окажется index.en.mdx, английская главная молча отрендерится с дырой —
+  // проверяем наличие пары явно.
+  test.each(EXPECTED_SLUGS)('AC-31: у %s есть английская версия', (slug) => {
+    expect(existsSync(caseFileEn(slug))).toBe(true);
+  });
+
+  test.each(EXPECTED_SLUGS)('AC-31: английский %s проходит валидацию схемы', (slug) => {
+    const raw = readFileSync(caseFileEn(slug), 'utf8');
+    expect(() => caseMetaSchema.parse(matter(raw).data)).not.toThrow();
+  });
+
+  test.each(EXPECTED_SLUGS)('AC-31: у английского %s существует файл обложки', (slug) => {
+    const raw = readFileSync(caseFileEn(slug), 'utf8');
+    const { cover } = caseMetaSchema.parse(matter(raw).data);
+    expect(existsSync(resolve(dirname(caseFileEn(slug)), cover))).toBe(true);
+  });
+
+  // Порядок задаётся полем order и должен совпадать: иначе на двух языках кейсы
+  // выстроятся по-разному, а ссылки «предыдущий/следующий» разъедутся между версиями.
+  test.each(EXPECTED_SLUGS)('AC-31: у %s одинаковый order в обеих версиях', (slug) => {
+    const ru = caseMetaSchema.parse(matter(readFileSync(caseFile(slug), 'utf8')).data);
+    const en = caseMetaSchema.parse(matter(readFileSync(caseFileEn(slug), 'utf8')).data);
+    expect(en.order).toBe(ru.order);
+  });
+
+  test.each(EXPECTED_SLUGS)('AC-31: английский %s действительно переведён', (slug) => {
+    const en = matter(readFileSync(caseFileEn(slug), 'utf8'));
+    const meta = caseMetaSchema.parse(en.data);
+    // Кириллица в заголовке или в теле означает, что кусок текста забыли перевести.
+    // Названия компаний — исключение: Cian, Netology, Delovye Linii записаны латиницей.
+    expect(meta.title, 'заголовок не переведён').not.toMatch(/[а-яё]/i);
+    expect(meta.summary, 'саммари не переведено').not.toMatch(/[а-яё]/i);
+    expect(en.content, 'в тексте осталась кириллица').not.toMatch(/[а-яё]/i);
+  });
+
+  test.each(EXPECTED_SLUGS)('AC-4: у всех изображений в английском %s непустой alt', (slug) => {
+    const body = matter(readFileSync(caseFileEn(slug), 'utf8')).content;
+    const images = [...body.matchAll(/!\[(.*?)\]\((.*?)\)/g)];
+    expect(images.length, 'в кейсе не нашлось ни одной картинки').toBeGreaterThan(0);
     for (const [, alt] of images) {
       expect(alt.trim().length).toBeGreaterThan(0);
     }

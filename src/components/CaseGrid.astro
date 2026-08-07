@@ -1,13 +1,19 @@
 ---
 import CaseCard from '@/components/CaseCard.astro';
 import { getSortedCases } from '@/lib/cases';
+import { defaultLocale, t, type Locale } from '@/lib/i18n';
 
-const cases = await getSortedCases();
+interface Props {
+  lang?: Locale;
+}
+
+const { lang = defaultLocale } = Astro.props;
+const cases = await getSortedCases(lang);
 ---
 
 <section id="cases" class="mx-auto max-w-5xl scroll-mt-20 px-4 py-16">
-  <h2 class="text-2xl font-semibold tracking-tight md:text-3xl">Кейсы</h2>
+  <h2 class="text-2xl font-semibold tracking-tight md:text-3xl">{t(lang).casesHeading}</h2>
   <div class="mt-8 grid gap-6 md:grid-cols-2">
-    {cases.map((entry) => <CaseCard entry={entry} />)}
+    {cases.map((entry) => <CaseCard entry={entry} lang={lang} />)}
   </div>
 </section>

@@ -1,15 +1,23 @@
 ---
 import ThemeScript from '@/components/ThemeScript.astro';
 import { withBase } from '@/lib/utils';
+import { defaultLocale, locales, localePath, type Locale } from '@/lib/i18n';
 import '@/styles/global.css';
 
 interface Props {
   title: string;
   description: string;
+  lang?: Locale;
+  /**
+   * Путь текущей страницы от корня сайта, без base и без языкового префикса:
+   * «/» или «/case/cian-client-info/». Из него собираются hreflang-ссылки на обе
+   * языковые версии. Не передан — альтернативной версии у страницы нет (404).
+   */
+  path?: string;
   ogImage?: string;
 }
 
-const { title, description, ogImage = '/og-default.png' } = Astro.props;
+const { title, description, lang = defaultLocale, path, ogImage = '/og-default.png' } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 // ogImage — путь от корня public БЕЗ base (например '/og-default.png') либо полный
@@ -18,6 +26,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImageUrl = /^https?:\/\//.test(ogImage)
   ? ogImage
   : new URL(withBase(ogImage), Astro.site).href;
+
+const alternates = path
+  ? locales.map((locale) => ({
+      locale,
+      href: new URL(withBase(localePath(locale, path)), Astro.site).href,
+    }))
+  : [];
 ---
 
 <meta charset="utf-8" />
@@ -26,9 +41,24 @@ const ogImageUrl = /^https?:\/\//.test(ogImage)
 <title>{title}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonical} />
+{
+  alternates.map((alternate) => (
+    <link rel="alternate" hreflang={alternate.locale} href={alternate.href} />
+  ))
+}
+{
+  alternates.length > 0 && (
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href={alternates.find((alternate) => alternate.locale === defaultLocale)!.href}
+    />
+  )
+}
 <meta property="og:type" content="website" />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={ogImageUrl} />
 <meta property="og:url" content={canonical} />
+<meta property="og:locale" content={lang === 'ru' ? 'ru_RU' : 'en_US'} />
 <meta name="twitter:card" content="summary_large_image" />

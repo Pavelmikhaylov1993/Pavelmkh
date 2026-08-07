@@ -9,6 +9,11 @@ const PATHS = [
   './case/netologiya-b2b-research/',
   './case/netologiya-ticket-messages/',
   './case/dellin-accounting-docs/',
+  // Английская версия проверяется выборочно: вёрстка у неё общая с русской, меняются
+  // только строки, поэтому гонять axe по всем шести переводам — время CI впустую.
+  // Но lang="en" в разметке axe читает, и на нём завязаны правила про язык страницы.
+  './en/',
+  './en/case/cian-client-info/',
 ];
 
 for (const path of PATHS) {

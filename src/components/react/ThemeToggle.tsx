@@ -1,6 +1,11 @@
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+interface Props {
+  /** Доступное имя кнопки. Приходит из словаря i18n — остров не знает про локали. */
+  label: string;
+}
+
 /**
  * Состояния здесь намеренно нет. Текущая тема живёт в классе на <html>, который
  * ставит инлайн-скрипт до первой отрисовки. Если продублировать её в React-стейте,
@@ -9,7 +14,7 @@ import { Button } from '@/components/ui/button';
  * светлой, пока не отработает гидратация. Обе иконки в разметке, видимость через
  * dark: — первый кадр всегда верный, гидратации нечего переписывать.
  */
-export function ThemeToggle() {
+export function ThemeToggle({ label }: Props) {
   function toggle() {
     const isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
@@ -18,13 +23,7 @@ export function ThemeToggle() {
   // size-11 перебивает size-9 из варианта icon: кнопка живёт в шапке, а AC-15
   // требует целевую область не меньше 44×44 на мобильном.
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="size-11"
-      onClick={toggle}
-      aria-label="Переключить тему"
-    >
+    <Button variant="ghost" size="icon" className="size-11" onClick={toggle} aria-label={label}>
       <Sun className="hidden size-5 dark:block" />
       <Moon className="size-5 dark:hidden" />
     </Button>

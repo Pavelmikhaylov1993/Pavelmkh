@@ -10,7 +10,9 @@ function renderWithImage() {
     </div>
     <div id="island"></div>
   `;
-  return render(<Lightbox />, { container: document.getElementById('island')! });
+  return render(<Lightbox fallbackTitle="Изображение из кейса" closeLabel="Закрыть" />, {
+    container: document.getElementById('island')!,
+  });
 }
 
 beforeEach(() => {

@@ -2,26 +2,35 @@
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { withBase } from '@/lib/utils';
-import { site } from '@/lib/site';
+import { profile } from '@/lib/site';
+import { caseSlug } from '@/lib/cases';
+import { defaultLocale, localePath, t, type Locale } from '@/lib/i18n';
 import { Lightbox } from '@/components/react/Lightbox';
 
 interface Props {
   entry: CollectionEntry<'cases'>;
   prev?: CollectionEntry<'cases'>;
   next?: CollectionEntry<'cases'>;
+  lang?: Locale;
 }
 
-const { entry, prev, next } = Astro.props;
+const { entry, prev, next, lang = defaultLocale } = Astro.props;
 const { title, company, role, outcome, metrics, summary } = entry.data;
+const strings = t(lang);
 ---
 
 <BaseLayout
-  title={`${company} — ${title} · ${site.name}`}
+  title={`${company} — ${title} · ${profile(lang).name}`}
   description={summary}
+  lang={lang}
+  path={`/case/${caseSlug(entry)}/`}
 >
   <article class="mx-auto max-w-3xl px-4 py-12 md:py-16">
-    <a href={withBase('/#cases')} class="text-sm text-muted-foreground hover:text-foreground">
-      ← Все кейсы
+    <a
+      href={withBase(`${localePath(lang, '/')}#cases`)}
+      class="text-sm text-muted-foreground hover:text-foreground"
+    >
+      {strings.backToCases}
     </a>
 
     <p data-testid="case-company" class="mt-8 text-sm text-muted-foreground">{company}</p>
@@ -29,11 +38,11 @@ const { title, company, role, outcome, metrics, summary } = entry.data;
 
     <dl class="mt-8 grid gap-4 border-y py-6 sm:grid-cols-2">
       <div>
-        <dt class="text-sm text-muted-foreground">Моя роль</dt>
+        <dt class="text-sm text-muted-foreground">{strings.myRole}</dt>
         <dd data-testid="case-role" class="mt-1">{role.join(', ')}</dd>
       </div>
       <div>
-        <dt class="text-sm text-muted-foreground">Результат</dt>
+        <dt class="text-sm text-muted-foreground">{strings.outcome}</dt>
         <dd data-testid="case-outcome" class="mt-1">{outcome}</dd>
       </div>
     </dl>
@@ -50,21 +59,31 @@ const { title, company, role, outcome, metrics, summary } = entry.data;
     )}
 
     <div class="prose-case mt-12">
-      <Lightbox client:visible />
+      <Lightbox
+        client:visible
+        fallbackTitle={strings.lightboxFallback}
+        closeLabel={strings.lightboxClose}
+      />
       <slot />
     </div>
 
     <nav class="mt-16 flex justify-between gap-4 border-t pt-8 text-sm">
       {prev ? (
-        <a href={withBase(`/case/${prev.id}/`)} class="hover:underline">
-          ← Предыдущий кейс
+        <a
+          href={withBase(localePath(lang, `/case/${caseSlug(prev)}/`))}
+          class="hover:underline"
+        >
+          {strings.prevCase}
         </a>
       ) : (
         <span></span>
       )}
       {next && (
-        <a href={withBase(`/case/${next.id}/`)} class="text-right hover:underline">
-          Следующий кейс →
+        <a
+          href={withBase(localePath(lang, `/case/${caseSlug(next)}/`))}
+          class="text-right hover:underline"
+        >
+          {strings.nextCase}
         </a>
       )}
     </nav>

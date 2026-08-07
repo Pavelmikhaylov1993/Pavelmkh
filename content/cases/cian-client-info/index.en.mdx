@@ -1,0 +1,49 @@
+---
+title: "Client information in chats"
+company: "Cian"
+order: 2
+summary: "Designed a client card inside Cian's chats so agents could see who they were talking to and reply to hot leads faster."
+role:
+  - "Research"
+  - "Interviews"
+  - "UX design"
+  - "Cross-team work"
+outcome: "Shipped inside the top subscription tier and paid for itself in the first month"
+metrics: [{value: "+5.3%", label: "upgrades to the top tier"}, {value: "₽5M+", label: "in monthly revenue"}]
+cover: "./cover.png"
+---
+## Context
+
+Cian is Russia's largest real estate marketplace, with more than 30 million users a month. Research showed that our users — real estate agents — wanted to know who was writing to them in private messages. The need came from the fact that agents talk very differently depending on how serious a buyer is. Put simply, an agent needs to answer a hot lead quickly and in the right tone.
+
+## Process
+
+To understand what agents actually base their decisions on, I ran interviews with 10 respondents. It turned out they needed to know what kind of property a prospective client was looking for, in which city and district, how long they had been searching, and their budget for the purchase or rent. On top of that, they wanted activity over a past period — views, calls, chats — and the list of listings the person had already opened. Together this data would let agents build the conversation properly.
+
+With the requirements in hand I went to engineering to check what we were technically allowed to show, and then got sign-off from legal.
+
+We decided to monetize the feature by bundling it into the top subscription tier. Our estimate was that pulling 5% of traffic up from the lower tiers would bring in over ₽5M a month, and would also raise satisfaction with the product, which feeds into our preference metric.
+
+![Final view of the client information card in a chat](./01.png)
+
+Once the architecture was sketched out, I took it to the neighbouring team that maintains chats. We agreed to show a preview of the information as a design system component, and keep the rest in the profile. The profile screen in chats, however, was visually outdated and full of legacy elements. That was a good reason to widen the scope slightly and clean it up. I checked with engineering how much extra time it would take and whether we could improve the page along the way. The changes turned out to be small on their side, so I got to work.
+
+![The outdated agent profile interface](./02.png)
+
+![Draft layout of the client information preview component](./03.png)
+
+The old agent screen
+
+![The old agent screen](./04.png)
+
+The new one
+
+![The new view](./05.png)
+
+I also highlighted the new feature inside the subscription
+
+![The new feature highlighted in the subscription](./06.png)
+
+## Outcome
+
+After release, 5.3% of users moved up to the more expensive subscription, which brought in over ₽5M a month.

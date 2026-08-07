@@ -2,14 +2,17 @@
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import { withBase } from '@/lib/utils';
+import { caseSlug } from '@/lib/cases';
+import { defaultLocale, localePath, type Locale } from '@/lib/i18n';
 
 interface Props {
   entry: CollectionEntry<'cases'>;
+  lang?: Locale;
 }
 
-const { entry } = Astro.props;
+const { entry, lang = defaultLocale } = Astro.props;
 const { title, company, summary, outcome, cover } = entry.data;
-const href = withBase(`/case/${entry.id}/`);
+const href = withBase(localePath(lang, `/case/${caseSlug(entry)}/`));
 ---
 
 <article class="h-full">
