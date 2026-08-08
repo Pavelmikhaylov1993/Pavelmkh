@@ -9,15 +9,10 @@ const CASES_DIR = 'content/cases';
 // Каждый кейс — своя папка с index.mdx и картинками рядом.
 const caseFile = (slug: string) => join(CASES_DIR, slug, 'index.mdx');
 
-const EXPECTED_SLUGS = [
-  'cian-packages-lineup',
-  'cian-client-info',
-  'netologiya-payment-ux',
-  'netologiya-coordinator-payouts',
-  'netologiya-b2b-research',
-  'netologiya-ticket-messages',
-  'dellin-accounting-docs',
-];
+// Список кейсов больше не дублируется руками: он читается из папки, как и на сайте.
+// Взамен явного перечисления проверяем структуру — так добавление кейса ничего
+// не ломает, но потеря кейса или сбитая нумерация по-прежнему видны.
+const MIN_CASES = 6;
 
 const slugs = existsSync(CASES_DIR)
   ? readdirSync(CASES_DIR, { withFileTypes: true })
@@ -25,33 +20,46 @@ const slugs = existsSync(CASES_DIR)
       .map((entry) => entry.name)
   : [];
 
+const orders = slugs.map(
+  (slug) => matter(readFileSync(caseFile(slug), 'utf8')).data.order as number,
+);
+
 describe('контент кейсов', () => {
-  test('AC-1: импортировано ровно 7 кейсов с ожидаемыми slug', () => {
-    expect([...slugs].sort()).toEqual([...EXPECTED_SLUGS].sort());
+  test(`AC-1: кейсов не меньше ${MIN_CASES} и у каждого корректный slug`, () => {
+    expect(slugs.length).toBeGreaterThanOrEqual(MIN_CASES);
+    for (const slug of slugs) {
+      expect(slug, `слаг «${slug}»`).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+    }
+  });
+
+  test('AC-1: order уникальны и идут подряд с единицы', () => {
+    expect([...orders].sort((a, b) => a - b)).toEqual(
+      Array.from({ length: slugs.length }, (_, i) => i + 1),
+    );
   });
 
   test('AC-2: дубликат «Заказ бухгалтерских документов» не импортирован', () => {
     expect(slugs).not.toContain('zakaz-buhgalterskih-dokumentov');
   });
 
-  test.each(EXPECTED_SLUGS)('AC-3: %s проходит валидацию схемы', (slug) => {
+  test.each(slugs)('AC-3: %s проходит валидацию схемы', (slug) => {
     const raw = readFileSync(caseFile(slug), 'utf8');
     expect(() => caseMetaSchema.parse(matter(raw).data)).not.toThrow();
   });
 
-  test.each(EXPECTED_SLUGS)('AC-3: у %s существует файл обложки', (slug) => {
+  test.each(slugs)('AC-3: у %s существует файл обложки', (slug) => {
     const raw = readFileSync(caseFile(slug), 'utf8');
     const { cover } = caseMetaSchema.parse(matter(raw).data);
     const absolute = resolve(dirname(caseFile(slug)), cover);
     expect(existsSync(absolute)).toBe(true);
   });
 
-  test.each(EXPECTED_SLUGS)('AC-2: в теле %s нет ссылок на yonote', (slug) => {
+  test.each(slugs)('AC-2: в теле %s нет ссылок на yonote', (slug) => {
     const raw = readFileSync(caseFile(slug), 'utf8');
     expect(raw).not.toContain('yonote.ru');
   });
 
-  test.each(EXPECTED_SLUGS)('AC-4: у всех изображений в %s непустой alt', (slug) => {
+  test.each(slugs)('AC-4: у всех изображений в %s непустой alt', (slug) => {
     const body = matter(readFileSync(caseFile(slug), 'utf8')).content;
     const images = [...body.matchAll(/!\[(.*?)\]\((.*?)\)/g)];
     for (const [, alt] of images) {

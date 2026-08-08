@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { slugs } from '../helpers/cases';
 
 test('AC-19: у главной осмысленные title и description', async ({ page }) => {
   await page.goto('./');
@@ -27,17 +28,9 @@ test('AC-15: шапка помещается на мобильном без го
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
-const SLUGS = [
-  'cian-packages-lineup',
-  'cian-client-info',
-  'netologiya-payment-ux',
-  'netologiya-coordinator-payouts',
-  'netologiya-b2b-research',
-  'netologiya-ticket-messages',
-  'dellin-accounting-docs',
-];
+const SLUGS = slugs();
 
-test('AC-21: sitemap содержит главную и все 7 кейсов', async ({ request }) => {
+test(`AC-21: sitemap содержит главную и все ${SLUGS.length} кейсов`, async ({ request }) => {
   const index = await request.get('/Pavelmkh/sitemap-index.xml');
   expect(index.status()).toBe(200);
 
