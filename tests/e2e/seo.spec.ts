@@ -28,6 +28,7 @@ test('AC-15: шапка помещается на мобильном без го
 });
 
 const SLUGS = [
+  'cian-packages-lineup',
   'cian-client-info',
   'netologiya-payment-ux',
   'netologiya-coordinator-payouts',
@@ -36,7 +37,7 @@ const SLUGS = [
   'dellin-accounting-docs',
 ];
 
-test('AC-21: sitemap содержит главную и все 6 кейсов', async ({ request }) => {
+test('AC-21: sitemap содержит главную и все 7 кейсов', async ({ request }) => {
   const index = await request.get('/Pavelmkh/sitemap-index.xml');
   expect(index.status()).toBe(200);
 

@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 const SLUGS = [
+  'cian-packages-lineup',
   'cian-client-info',
   'netologiya-payment-ux',
   'netologiya-coordinator-payouts',
@@ -10,6 +11,7 @@ const SLUGS = [
 ];
 
 const CASES: Record<string, { heading: string; company: string }> = {
+  'cian-packages-lineup': { heading: 'Новая линейка пакетов', company: 'Циан' },
   'cian-client-info': { heading: 'Информация о клиенте в чатах', company: 'Циан' },
   'netologiya-payment-ux': { heading: 'Улучшение UX в блоке оплаты', company: 'Нетология' },
   'netologiya-coordinator-payouts': { heading: 'Выплаты координаторам', company: 'Нетология' },

@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-test('AC-6: на главной ровно 6 карточек кейсов', async ({ page }) => {
+test('AC-6: на главной ровно 7 карточек кейсов', async ({ page }) => {
   await page.goto('./');
-  await expect(page.locator('#cases article')).toHaveCount(6);
+  await expect(page.locator('#cases article')).toHaveCount(7);
 });
 
 test('AC-6: первым идёт кейс Циана', async ({ page }) => {
@@ -16,9 +16,9 @@ test('AC-6: первым идёт кейс Циана', async ({ page }) => {
 test('AC-7: клик по карточке ведёт на страницу кейса', async ({ page }) => {
   await page.goto('./');
   await page.locator('#cases article a').first().click();
-  await expect(page).toHaveURL(/\/Pavelmkh\/case\/cian-client-info\/$/);
+  await expect(page).toHaveURL(/\/Pavelmkh\/case\/cian-packages-lineup\/$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Информация о клиенте в чатах',
+    'Новая линейка пакетов',
   );
 });
 

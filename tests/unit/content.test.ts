@@ -10,6 +10,7 @@ const CASES_DIR = 'content/cases';
 const caseFile = (slug: string) => join(CASES_DIR, slug, 'index.mdx');
 
 const EXPECTED_SLUGS = [
+  'cian-packages-lineup',
   'cian-client-info',
   'netologiya-payment-ux',
   'netologiya-coordinator-payouts',
@@ -25,7 +26,7 @@ const slugs = existsSync(CASES_DIR)
   : [];
 
 describe('контент кейсов', () => {
-  test('AC-1: импортировано ровно 6 кейсов с ожидаемыми slug', () => {
+  test('AC-1: импортировано ровно 7 кейсов с ожидаемыми slug', () => {
     expect([...slugs].sort()).toEqual([...EXPECTED_SLUGS].sort());
   });
 
