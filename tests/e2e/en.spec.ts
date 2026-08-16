@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { publishedCases, publishedCasesEn } from '../helpers/cases';
 
 /**
  * Английская версия. Локаль передаётся пропсом lang, а у пропа есть значение по
@@ -7,14 +8,8 @@ import { expect, test } from '@playwright/test';
  * именно английские строки, а не факт того, что страница открылась.
  */
 
-const SLUGS = [
-  'cian-client-info',
-  'netologiya-payment-ux',
-  'netologiya-coordinator-payouts',
-  'netologiya-b2b-research',
-  'netologiya-ticket-messages',
-  'dellin-accounting-docs',
-];
+const cases = publishedCasesEn();
+const first = cases[0];
 
 test('AC-30: английская главная отдаёт английский герой и lang=en', async ({ page }) => {
   const response = await page.goto('./en/');
@@ -26,56 +21,53 @@ test('AC-30: английская главная отдаёт английски
   await expect(page.locator('#cases h2')).toHaveText('Case studies');
 });
 
-test('AC-30: на английской главной те же шесть кейсов, первым Циан', async ({ page }) => {
+test('AC-30: на английской главной те же кейсы и в том же порядке', async ({ page }) => {
   await page.goto('./en/');
-  await expect(page.locator('#cases article')).toHaveCount(6);
-  await expect(page.locator('#cases article').first()).toContainText('Cian');
-  await expect(page.locator('#cases article').first()).toContainText(
-    'Client information in chats',
-  );
+  await expect(page.locator('#cases article')).toHaveCount(publishedCases().length);
+  await expect(page.locator('#cases article').first()).toContainText(first.title);
+  await expect(page.locator('#cases article').first()).toContainText(first.company);
 });
 
 test('AC-30: карточка на /en/ ведёт на английскую страницу кейса', async ({ page }) => {
   await page.goto('./en/');
   await page.locator('#cases article a').first().click();
-  await expect(page).toHaveURL(/\/Pavelmkh\/en\/case\/cian-client-info\/$/);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Client information in chats');
+  await expect(page).toHaveURL(new RegExp(`/Pavelmkh/en/case/${first.slug}/$`));
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(first.title);
 });
 
-for (const slug of SLUGS) {
-  test(`AC-30: английская страница ${slug} открывается и подписана по-английски`, async ({
+for (const item of cases) {
+  test(`AC-30: английская страница ${item.slug} открывается и подписана по-английски`, async ({
     page,
   }) => {
-    const response = await page.goto(`./en/case/${slug}/`);
+    const response = await page.goto(`./en/case/${item.slug}/`);
     expect(response?.status()).toBe(200);
 
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(item.title);
 
     // Именно подписи в первом <dl>, а не getByText: слово Outcome есть ещё и в
     // заголовке раздела внутри текста кейса, и поиск по странице нашёл бы два узла.
     const labels = page.locator('dl').first().locator('dt');
     await expect(labels.nth(0)).toHaveText('My role');
     await expect(labels.nth(1)).toHaveText('Outcome');
-    await expect(page.getByTestId('case-company')).not.toBeEmpty();
   });
 }
 
 test('AC-30: русская версия кейса не съехала на английские подписи', async ({ page }) => {
-  await page.goto('./case/cian-client-info/');
+  const ru = publishedCases()[0];
+  await page.goto(`./case/${ru.slug}/`);
   await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
   await expect(page.locator('dl').first().locator('dt').nth(0)).toHaveText('Моя роль');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Информация о клиенте в чатах',
-  );
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(ru.title);
 });
 
 test('AC-32: переключатель ведёт на ту же страницу на другом языке', async ({ page }) => {
-  await page.goto('./case/cian-client-info/');
+  await page.goto(`./case/${first.slug}/`);
   await page.getByRole('link', { name: 'Switch to English' }).click();
-  await expect(page).toHaveURL(/\/Pavelmkh\/en\/case\/cian-client-info\/$/);
+  await expect(page).toHaveURL(new RegExp(`/Pavelmkh/en/case/${first.slug}/$`));
 
   await page.getByRole('link', { name: 'Смотреть на русском' }).click();
-  await expect(page).toHaveURL(/\/Pavelmkh\/case\/cian-client-info\/$/);
+  await expect(page).toHaveURL(new RegExp(`/Pavelmkh/case/${first.slug}/$`));
 });
 
 test('AC-32: у обеих версий главной есть hreflang друг на друга', async ({ page }) => {

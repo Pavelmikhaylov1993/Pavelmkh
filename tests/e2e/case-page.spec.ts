@@ -1,30 +1,17 @@
 import { expect, test } from '@playwright/test';
+import { neighbours, publishedCases } from '../helpers/cases';
 
-const SLUGS = [
-  'cian-client-info',
-  'netologiya-payment-ux',
-  'netologiya-coordinator-payouts',
-  'netologiya-b2b-research',
-  'netologiya-ticket-messages',
-  'dellin-accounting-docs',
-];
+const CASES = publishedCases();
+const SLUGS = CASES.map((c) => c.slug);
+const FIRST = CASES[0];
+const LAST = CASES[CASES.length - 1];
 
-const CASES: Record<string, { heading: string; company: string }> = {
-  'cian-client-info': { heading: 'Информация о клиенте в чатах', company: 'Циан' },
-  'netologiya-payment-ux': { heading: 'Улучшение UX в блоке оплаты', company: 'Нетология' },
-  'netologiya-coordinator-payouts': { heading: 'Выплаты координаторам', company: 'Нетология' },
-  'netologiya-b2b-research': { heading: 'Исследование B2B пользователей (HR-кабинет)', company: 'Нетология' },
-  'netologiya-ticket-messages': { heading: 'Исходящие сообщения в тикет-системе', company: 'Нетология' },
-  'dellin-accounting-docs': { heading: 'Заказ бухгалтерских документов', company: 'Деловые Линии' },
-};
-
-for (const slug of SLUGS) {
+for (const { slug, title, company } of CASES) {
   test(`AC-10: страница ${slug} содержит заголовок, компанию, роль и результат`, async ({ page }) => {
     const response = await page.goto(`./case/${slug}/`);
     expect(response?.status()).toBe(200);
 
-    const { heading, company } = CASES[slug];
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(heading);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
     await expect(page.getByTestId('case-company')).toHaveText(company);
     await expect(page.getByTestId('case-role')).not.toBeEmpty();
     await expect(page.getByTestId('case-outcome')).not.toBeEmpty();
@@ -62,31 +49,40 @@ test('AC-12: со страницы кейса есть возврат к сет�
   expect(heading.y).toBeGreaterThanOrEqual(header.y + header.height);
 });
 
-test('AC-12: есть переход к следующему кейсу', async ({ page }) => {
-  await page.goto('./case/cian-client-info/');
-  await page.getByRole('link', { name: /Следующий кейс/ }).click();
-  await expect(page).toHaveURL(/\/case\/netologiya-payment-ux\/$/);
-});
+// Переходы проверяем на каждой паре соседей, а не на одной выбранной руками:
+// иначе сдвиг порядка ловится только там, куда случайно попал тест.
+for (const { slug } of CASES) {
+  const { prev, next } = neighbours(slug);
 
-// У ветки prev в разметке своя реализация, отличная от next: есть else с распоркой
-// для флексбокса. Проверялся при этом только next — то есть сдвиг на единицу, когда
-// «предыдущий» ведёт сам на себя, поймать было нечем.
-test('AC-12: есть переход к предыдущему кейсу', async ({ page }) => {
-  await page.goto('./case/netologiya-payment-ux/');
-  await page.getByRole('link', { name: /Предыдущий кейс/ }).click();
-  await expect(page).toHaveURL(/\/case\/cian-client-info\/$/);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Информация о клиенте в чатах',
-  );
-});
+  if (next) {
+    test(`AC-12: с ${slug} есть переход к следующему кейсу`, async ({ page }) => {
+      await page.goto(`./case/${slug}/`);
+      await page.getByRole('link', { name: /Следующий кейс/ }).click();
+      await expect(page).toHaveURL(new RegExp(`/case/${next.slug}/$`));
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText(next.title);
+    });
+  }
+
+  // У ветки prev в разметке своя реализация, отличная от next: есть else с распоркой
+  // для флексбокса. Проверялся при этом только next — то есть сдвиг на единицу, когда
+  // «предыдущий» ведёт сам на себя, поймать было нечем.
+  if (prev) {
+    test(`AC-12: с ${slug} есть переход к предыдущему кейсу`, async ({ page }) => {
+      await page.goto(`./case/${slug}/`);
+      await page.getByRole('link', { name: /Предыдущий кейс/ }).click();
+      await expect(page).toHaveURL(new RegExp(`/case/${prev.slug}/$`));
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText(prev.title);
+    });
+  }
+}
 
 test('AC-12: у первого кейса нет ссылки «Предыдущий кейс»', async ({ page }) => {
-  await page.goto('./case/cian-client-info/');
+  await page.goto(`./case/${FIRST.slug}/`);
   await expect(page.getByRole('link', { name: /Предыдущий кейс/ })).toHaveCount(0);
   await expect(page.getByRole('link', { name: /Следующий кейс/ })).toHaveCount(1);
 });
 
 test('AC-12: у последнего кейса нет ссылки «Следующий кейс»', async ({ page }) => {
-  await page.goto('./case/dellin-accounting-docs/');
+  await page.goto(`./case/${LAST.slug}/`);
   await expect(page.getByRole('link', { name: /Следующий кейс/ })).toHaveCount(0);
 });

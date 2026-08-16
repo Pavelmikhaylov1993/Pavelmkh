@@ -11,14 +11,10 @@ const CASES_DIR = 'content/cases';
 const caseFile = (slug: string) => join(CASES_DIR, slug, 'index.mdx');
 const caseFileEn = (slug: string) => join(CASES_DIR, slug, 'index.en.mdx');
 
-const EXPECTED_SLUGS = [
-  'cian-client-info',
-  'netologiya-payment-ux',
-  'netologiya-coordinator-payouts',
-  'netologiya-b2b-research',
-  'netologiya-ticket-messages',
-  'dellin-accounting-docs',
-];
+// Список кейсов больше не дублируется руками: он читается из папки, как и на сайте.
+// Взамен явного перечисления проверяем структуру — так добавление кейса ничего
+// не ломает, но потеря кейса или сбитая нумерация по-прежнему видны.
+const MIN_CASES = 6;
 
 const slugs = existsSync(CASES_DIR)
   ? readdirSync(CASES_DIR, { withFileTypes: true })
@@ -26,33 +22,46 @@ const slugs = existsSync(CASES_DIR)
       .map((entry) => entry.name)
   : [];
 
+const orders = slugs.map(
+  (slug) => matter(readFileSync(caseFile(slug), 'utf8')).data.order as number,
+);
+
 describe('контент кейсов', () => {
-  test('AC-1: импортировано ровно 6 кейсов с ожидаемыми slug', () => {
-    expect([...slugs].sort()).toEqual([...EXPECTED_SLUGS].sort());
+  test(`AC-1: кейсов не меньше ${MIN_CASES} и у каждого корректный slug`, () => {
+    expect(slugs.length).toBeGreaterThanOrEqual(MIN_CASES);
+    for (const slug of slugs) {
+      expect(slug, `слаг «${slug}»`).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+    }
+  });
+
+  test('AC-1: order уникальны и идут подряд с единицы', () => {
+    expect([...orders].sort((a, b) => a - b)).toEqual(
+      Array.from({ length: slugs.length }, (_, i) => i + 1),
+    );
   });
 
   test('AC-2: дубликат «Заказ бухгалтерских документов» не импортирован', () => {
     expect(slugs).not.toContain('zakaz-buhgalterskih-dokumentov');
   });
 
-  test.each(EXPECTED_SLUGS)('AC-3: %s проходит валидацию схемы', (slug) => {
+  test.each(slugs)('AC-3: %s проходит валидацию схемы', (slug) => {
     const raw = readFileSync(caseFile(slug), 'utf8');
     expect(() => caseMetaSchema.parse(matter(raw).data)).not.toThrow();
   });
 
-  test.each(EXPECTED_SLUGS)('AC-3: у %s существует файл обложки', (slug) => {
+  test.each(slugs)('AC-3: у %s существует файл обложки', (slug) => {
     const raw = readFileSync(caseFile(slug), 'utf8');
     const { cover } = caseMetaSchema.parse(matter(raw).data);
     const absolute = resolve(dirname(caseFile(slug)), cover);
     expect(existsSync(absolute)).toBe(true);
   });
 
-  test.each(EXPECTED_SLUGS)('AC-2: в теле %s нет ссылок на yonote', (slug) => {
+  test.each(slugs)('AC-2: в теле %s нет ссылок на yonote', (slug) => {
     const raw = readFileSync(caseFile(slug), 'utf8');
     expect(raw).not.toContain('yonote.ru');
   });
 
-  test.each(EXPECTED_SLUGS)('AC-4: у всех изображений в %s непустой alt', (slug) => {
+  test.each(slugs)('AC-4: у всех изображений в %s непустой alt', (slug) => {
     const body = matter(readFileSync(caseFile(slug), 'utf8')).content;
     const images = [...body.matchAll(/!\[(.*?)\]\((.*?)\)/g)];
     for (const [, alt] of images) {
@@ -60,19 +69,19 @@ describe('контент кейсов', () => {
     }
   });
 
-  // Английская версия. Сетка на /en/ строится из тех же шести папок: если у кейса
-  // не окажется index.en.mdx, английская главная молча отрендерится с дырой —
-  // проверяем наличие пары явно.
-  test.each(EXPECTED_SLUGS)('AC-31: у %s есть английская версия', (slug) => {
+  // Английская версия. Список тот же самый, что и у русской: сетка на /en/ строится
+  // из тех же папок. Если у кейса не окажется index.en.mdx, английская главная молча
+  // отрендерится с дырой — проверяем наличие пары явно.
+  test.each(slugs)('AC-31: у %s есть английская версия', (slug) => {
     expect(existsSync(caseFileEn(slug))).toBe(true);
   });
 
-  test.each(EXPECTED_SLUGS)('AC-31: английский %s проходит валидацию схемы', (slug) => {
+  test.each(slugs)('AC-31: английский %s проходит валидацию схемы', (slug) => {
     const raw = readFileSync(caseFileEn(slug), 'utf8');
     expect(() => caseMetaSchema.parse(matter(raw).data)).not.toThrow();
   });
 
-  test.each(EXPECTED_SLUGS)('AC-31: у английского %s существует файл обложки', (slug) => {
+  test.each(slugs)('AC-31: у английского %s существует файл обложки', (slug) => {
     const raw = readFileSync(caseFileEn(slug), 'utf8');
     const { cover } = caseMetaSchema.parse(matter(raw).data);
     expect(existsSync(resolve(dirname(caseFileEn(slug)), cover))).toBe(true);
@@ -80,13 +89,13 @@ describe('контент кейсов', () => {
 
   // Порядок задаётся полем order и должен совпадать: иначе на двух языках кейсы
   // выстроятся по-разному, а ссылки «предыдущий/следующий» разъедутся между версиями.
-  test.each(EXPECTED_SLUGS)('AC-31: у %s одинаковый order в обеих версиях', (slug) => {
+  test.each(slugs)('AC-31: у %s одинаковый order в обеих версиях', (slug) => {
     const ru = caseMetaSchema.parse(matter(readFileSync(caseFile(slug), 'utf8')).data);
     const en = caseMetaSchema.parse(matter(readFileSync(caseFileEn(slug), 'utf8')).data);
     expect(en.order).toBe(ru.order);
   });
 
-  test.each(EXPECTED_SLUGS)('AC-31: английский %s действительно переведён', (slug) => {
+  test.each(slugs)('AC-31: английский %s действительно переведён', (slug) => {
     const en = matter(readFileSync(caseFileEn(slug), 'utf8'));
     const meta = caseMetaSchema.parse(en.data);
     // Кириллица в заголовке или в теле означает, что кусок текста забыли перевести.
@@ -96,7 +105,7 @@ describe('контент кейсов', () => {
     expect(en.content, 'в тексте осталась кириллица').not.toMatch(/[а-яё]/i);
   });
 
-  test.each(EXPECTED_SLUGS)('AC-4: у всех изображений в английском %s непустой alt', (slug) => {
+  test.each(slugs)('AC-4: у всех изображений в английском %s непустой alt', (slug) => {
     const body = matter(readFileSync(caseFileEn(slug), 'utf8')).content;
     const images = [...body.matchAll(/!\[(.*?)\]\((.*?)\)/g)];
     expect(images.length, 'в кейсе не нашлось ни одной картинки').toBeGreaterThan(0);
