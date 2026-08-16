@@ -92,14 +92,22 @@ test('AC-32: canonical английской главной указывает н
   );
 });
 
-// Английского PDF пока нет: site.cvFile.en === null. Кнопка не должна появляться
-// вовсе — вести англоязычного человека на русское резюме хуже, чем не звать никуда.
-test('AC-30: на английской версии нет кнопки резюме, на русской есть', async ({ page }) => {
-  await page.goto('./en/');
-  await expect(page.locator('#contacts').getByRole('link', { name: /Resume/ })).toHaveCount(0);
+// У каждой версии своё резюме, и подменить их местами легко: имена файлов отличаются
+// одним суффиксом. Поэтому проверяем не «кнопка есть», а куда именно она ведёт и что
+// по этому адресу действительно лежит PDF.
+test('AC-30: каждая версия ведёт на своё резюме', async ({ page, request }) => {
+  for (const [path, name, file] of [
+    ['./en/', /Resume/, '/Pavelmkh/Pavel_Mikhaylov_CV_EN.pdf'],
+    ['./', /Резюме/, '/Pavelmkh/Pavel_Mikhaylov_CV.pdf'],
+  ] as const) {
+    await page.goto(path);
+    const link = page.locator('#contacts').getByRole('link', { name });
+    await expect(link).toHaveAttribute('href', file);
 
-  await page.goto('./');
-  await expect(page.locator('#contacts').getByRole('link', { name: /Резюме/ })).toHaveCount(1);
+    const response = await request.get(file);
+    expect(response.status()).toBe(200);
+    expect(response.headers()['content-type']).toContain('application/pdf');
+  }
 });
 
 test('AC-30: страница 404 говорит на обоих языках', async ({ page }) => {

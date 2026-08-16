@@ -114,8 +114,9 @@ describe('контент кейсов', () => {
     }
   });
 
-  test('AC-9: CV лежит в public', () => {
+  test('AC-9: резюме на обоих языках лежит в public', () => {
     expect(existsSync('public/Pavel_Mikhaylov_CV.pdf')).toBe(true);
+    expect(existsSync('public/Pavel_Mikhaylov_CV_EN.pdf')).toBe(true);
   });
 
   test('AC-5a: портрет лежит в assets', () => {
