@@ -1,21 +1,36 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { withBase } from '@/lib/utils';
-import { site } from '@/lib/site';
+import { profile } from '@/lib/site';
+import { localePath, t } from '@/lib/i18n';
+
+// GitHub Pages отдаёт одну страницу 404 на весь сайт, отдельной английской быть не
+// может. Поэтому страница двуязычная: сверху русский текст, ниже английский.
+const ru = t('ru');
+const en = t('en');
 ---
 
 <BaseLayout
-  title={`Страница не найдена — ${site.name}`}
-  description="Такой страницы на сайте нет. Возможно, ссылка устарела."
+  title={`${ru.notFoundTitle} — ${profile('ru').name}`}
+  description={ru.notFoundDescription}
 >
   <section class="mx-auto max-w-3xl px-4 py-24 text-center">
     <h1 class="text-5xl font-semibold tracking-tight">404</h1>
-    <p class="mt-4 text-muted-foreground">Такой страницы нет. Возможно, ссылка устарела.</p>
-    <a
-      href={withBase('/')}
-      class="mt-8 inline-flex min-h-11 items-center rounded-md border px-5 hover:bg-accent"
-    >
-      На главную
-    </a>
+    <p class="mt-4 text-muted-foreground">{ru.notFoundText}</p>
+    <p class="mt-2 text-muted-foreground">{en.notFoundText}</p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a
+        href={withBase(localePath('ru', '/'))}
+        class="inline-flex min-h-11 items-center rounded-md border px-5 hover:bg-accent"
+      >
+        {ru.notFoundHome}
+      </a>
+      <a
+        href={withBase(localePath('en', '/'))}
+        class="inline-flex min-h-11 items-center rounded-md border px-5 hover:bg-accent"
+      >
+        {en.notFoundHome}
+      </a>
+    </div>
   </section>
 </BaseLayout>

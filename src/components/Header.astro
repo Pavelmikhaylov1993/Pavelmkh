@@ -1,20 +1,49 @@
 ---
 import { ThemeToggle } from '@/components/react/ThemeToggle';
 import { withBase } from '@/lib/utils';
-import { site } from '@/lib/site';
+import { profile } from '@/lib/site';
+import { defaultLocale, localePath, otherLocale, t, type Locale } from '@/lib/i18n';
+
+interface Props {
+  lang?: Locale;
+  /**
+   * Путь страницы от корня сайта без языкового префикса. Переключатель ведёт на ту
+   * же страницу на другом языке; для страниц без пары (404) — на главную.
+   */
+  path?: string;
+}
+
+const { lang = defaultLocale, path } = Astro.props;
+const strings = t(lang);
+const other = otherLocale(lang);
 ---
 
 <header class="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
   <nav class="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
-    <a href={withBase('/')} class="flex min-h-11 items-center font-medium">{site.name}</a>
+    <a href={withBase(localePath(lang, '/'))} class="flex min-h-11 items-center font-medium">
+      {profile(lang).name}
+    </a>
     <div class="flex items-center gap-1">
       <a
-        href={withBase('/#cases')}
+        href={withBase(`${localePath(lang, '/')}#cases`)}
         class="flex min-h-11 items-center rounded-md px-3 text-sm text-muted-foreground hover:text-foreground"
       >
-        Кейсы
+        {strings.casesNav}
       </a>
-      <ThemeToggle client:load />
+      <!--
+        Подпись переключателя — на языке, КУДА он ведёт: человек, попавший не на ту
+        версию, скорее всего не читает текущую. Поэтому на русской странице здесь
+        английское «EN», и наоборот.
+      -->
+      <a
+        href={withBase(localePath(other, path ?? '/'))}
+        hreflang={other}
+        aria-label={strings.switchTo}
+        class="flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-muted-foreground uppercase hover:text-foreground"
+      >
+        {other}
+      </a>
+      <ThemeToggle client:load label={strings.themeToggle} />
     </div>
   </nav>
 </header>

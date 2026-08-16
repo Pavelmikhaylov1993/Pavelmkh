@@ -6,7 +6,14 @@ interface OpenImage {
   alt: string;
 }
 
-export function Lightbox() {
+interface Props {
+  /** Заголовок диалога, когда у картинки пустой alt. Приходит из словаря i18n. */
+  fallbackTitle: string;
+  /** Подпись крестика для скринридера. Тоже из словаря — остров не знает про локали. */
+  closeLabel: string;
+}
+
+export function Lightbox({ fallbackTitle, closeLabel }: Props) {
   const [image, setImage] = useState<OpenImage | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
 
@@ -54,6 +61,7 @@ export function Lightbox() {
       <Dialog open={image !== null} onOpenChange={onOpenChange}>
         <DialogContent
           className="max-w-[95vw] p-2 sm:max-w-5xl"
+          closeLabel={closeLabel}
           onCloseAutoFocus={(event) => {
             // Фокусом на закрытии управляем сами (возврат на изображение-триггер).
             // Без Dialog.Trigger радиксу не на что опереться при автоматическом
@@ -65,7 +73,7 @@ export function Lightbox() {
             triggerRef.current?.focus();
           }}
         >
-          <DialogTitle className="sr-only">{image?.alt ?? 'Изображение из кейса'}</DialogTitle>
+          <DialogTitle className="sr-only">{image?.alt || fallbackTitle}</DialogTitle>
           {image && (
             <img src={image.src} alt={image.alt} className="max-h-[85vh] w-full rounded object-contain" />
           )}

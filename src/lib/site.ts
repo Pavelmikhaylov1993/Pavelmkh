@@ -1,21 +1,55 @@
+import type { Locale } from '@/lib/i18n';
+
 export const site = {
-  name: 'Павел Михайлов',
-  role: 'Senior Product Designer',
-  bio:
-    'Senior Product Designer с 5+ годами опыта в B2B и B2C продуктах. Разрабатываю решения ' +
-    'для монетизации, CRM, маркетплейсов и EdTech. Проектирую продукты на основе исследований, ' +
-    'продуктовых метрик и экспериментов, тесно работая с PM, аналитиками и разработчиками. ' +
-    'Работаю с Claude: анализирую исследования и интервью, прорабатываю тексты интерфейсов, ' +
-    'собираю рабочие прототипы кодом.',
-  // Отдельная короткая строка под meta description и og:description. Обрезать bio нельзя:
-  // 261 символ не влезает в сниппет, а срез по символу рвёт фразу на середине слова.
-  description:
-    'Senior Product Designer. B2B и B2C продукты: монетизация, CRM, маркетплейсы, EdTech. ' +
-    'Проектирую на основе исследований и продуктовых метрик.',
   contacts: [
-    { label: 'Телеграм', href: 'https://t.me/Pavelmkh' },
-    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/pavel-mikhaylov93/' },
-    { label: 'Behance', href: 'https://www.behance.net/pavelm1993e4f6' },
+    { href: 'https://t.me/Pavelmkh', label: { ru: 'Телеграм', en: 'Telegram' } },
+    {
+      href: 'https://www.linkedin.com/in/pavel-mikhaylov93/',
+      label: { ru: 'LinkedIn', en: 'LinkedIn' },
+    },
+    { href: 'https://www.behance.net/pavelm1993e4f6', label: { ru: 'Behance', en: 'Behance' } },
   ],
-  cvFile: 'Pavel_Mikhaylov_CV.pdf',
+
+  // Резюме на каждом языке — свой файл в public/. Если для языка поставить null,
+  // кнопка «Резюме» на его версии не отрендерится вовсе: вести человека на резюме
+  // на чужом языке хуже, чем не звать никуда. Вёрстку при этом править не нужно.
+  cvFile: {
+    ru: 'Pavel_Mikhaylov_CV.pdf',
+    en: 'Pavel_Mikhaylov_CV_EN.pdf',
+  },
+
+  profile: {
+    ru: {
+      name: 'Павел Михайлов',
+      role: 'Senior Product Designer',
+      bio:
+        'Senior Product Designer с 5+ годами опыта в B2B и B2C продуктах. Разрабатываю решения ' +
+        'для монетизации, CRM, маркетплейсов и EdTech. Проектирую продукты на основе исследований, ' +
+        'продуктовых метрик и экспериментов, тесно работая с PM, аналитиками и разработчиками. ' +
+        'Работаю с Claude: анализирую исследования и интервью, прорабатываю тексты интерфейсов, ' +
+        'собираю рабочие прототипы кодом.',
+      // Отдельная короткая строка под meta description и og:description. Обрезать bio нельзя:
+      // 261 символ не влезает в сниппет, а срез по символу рвёт фразу на середине слова.
+      description:
+        'Senior Product Designer. B2B и B2C продукты: монетизация, CRM, маркетплейсы, EdTech. ' +
+        'Проектирую на основе исследований и продуктовых метрик.',
+    },
+    en: {
+      name: 'Pavel Mikhaylov',
+      role: 'Senior Product Designer',
+      bio:
+        'Senior Product Designer with 5+ years in B2B and B2C products. I build solutions for ' +
+        'monetization, CRM, marketplaces and EdTech, designing from research, product metrics ' +
+        'and experiments in close work with PMs, analysts and engineers. I work with Claude: ' +
+        'analyzing research and interviews, shaping interface copy, building working prototypes ' +
+        'in code.',
+      description:
+        'Senior Product Designer. B2B and B2C products: monetization, CRM, marketplaces, EdTech. ' +
+        'I design from research and product metrics.',
+    },
+  },
 } as const;
+
+export function profile(lang: Locale) {
+  return site.profile[lang];
+}

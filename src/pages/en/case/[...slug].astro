@@ -4,7 +4,7 @@ import CaseLayout from '@/layouts/CaseLayout.astro';
 import { getSortedCases, caseSlug } from '@/lib/cases';
 
 export async function getStaticPaths() {
-  const cases = await getSortedCases('ru');
+  const cases = await getSortedCases('en');
 
   return cases.map((entry, index) => ({
     params: { slug: caseSlug(entry) },
@@ -16,6 +16,6 @@ const { entry, prev, next } = Astro.props;
 const { Content } = await render(entry);
 ---
 
-<CaseLayout entry={entry} prev={prev} next={next} lang="ru">
+<CaseLayout entry={entry} prev={prev} next={next} lang="en">
   <Content />
 </CaseLayout>

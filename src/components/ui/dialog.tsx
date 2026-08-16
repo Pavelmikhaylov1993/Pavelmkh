@@ -45,13 +45,18 @@ function DialogOverlay({
   )
 }
 
+// closeLabel обязателен: подпись крестика видна только скринридеру, и вшитая сюда
+// строка на английской версии сайта осталась бы русской, а заметить это глазами
+// нельзя. Локаль до примитива не доходит — строку передаёт вызывающий компонент.
 function DialogContent({
   className,
   children,
   showCloseButton = true,
+  closeLabel,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
+  closeLabel: string
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
@@ -71,7 +76,7 @@ function DialogContent({
             className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon />
-            <span className="sr-only">Закрыть</span>
+            <span className="sr-only">{closeLabel}</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>
@@ -89,6 +94,10 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Не используется: единственный потребитель диалога — Lightbox, и он берёт только
+// Dialog, DialogContent и DialogTitle. Поэтому строка «Закрыть» ниже осталась
+// русской. Появится реальный потребитель — подпись придётся вынести в проп, как в
+// DialogContent, иначе на английской версии она будет русской.
 function DialogFooter({
   className,
   showCloseButton = false,

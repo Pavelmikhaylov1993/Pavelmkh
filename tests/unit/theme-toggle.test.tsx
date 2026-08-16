@@ -13,14 +13,14 @@ beforeEach(() => {
 
 describe('ThemeToggle', () => {
   test('AC-16: клик включает тёмную тему и пишет её в localStorage', async () => {
-    render(<ThemeToggle />);
+    render(<ThemeToggle label="Переключить тему" />);
     await userEvent.click(screen.getByRole('button'));
     expect(document.documentElement).toHaveClass('dark');
     expect(localStorage.getItem('theme')).toBe('dark');
   });
 
   test('AC-16: повторный клик возвращает светлую тему', async () => {
-    render(<ThemeToggle />);
+    render(<ThemeToggle label="Переключить тему" />);
     const button = screen.getByRole('button');
     await userEvent.click(button);
     await userEvent.click(button);
@@ -30,19 +30,19 @@ describe('ThemeToggle', () => {
 
   test('AC-16: клик при уже включённой тёмной теме выключает её', async () => {
     document.documentElement.classList.add('dark');
-    render(<ThemeToggle />);
+    render(<ThemeToggle label="Переключить тему" />);
     await userEvent.click(screen.getByRole('button'));
     expect(document.documentElement).not.toHaveClass('dark');
     expect(localStorage.getItem('theme')).toBe('light');
   });
 
-  test('AC-24: у кнопки есть доступное имя', () => {
-    render(<ThemeToggle />);
-    expect(screen.getByRole('button')).toHaveAccessibleName(/тему/i);
+  test('AC-24: доступное имя кнопки приходит пропсом — на английской версии оно английское', () => {
+    render(<ThemeToggle label="Toggle theme" />);
+    expect(screen.getByRole('button')).toHaveAccessibleName('Toggle theme');
   });
 
   test('AC-18: разметка не зависит от состояния — обе иконки в DOM', () => {
-    const { container } = render(<ThemeToggle />);
+    const { container } = render(<ThemeToggle label="Переключить тему" />);
     expect(container.querySelectorAll('svg')).toHaveLength(2);
   });
 });

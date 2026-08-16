@@ -23,8 +23,8 @@ export type CaseInfo = {
   draft: boolean;
 };
 
-function read(slug: string): CaseInfo {
-  const raw = readFileSync(join(CASES_DIR, slug, 'index.mdx'), 'utf8');
+function read(slug: string, file = 'index.mdx'): CaseInfo {
+  const raw = readFileSync(join(CASES_DIR, slug, file), 'utf8');
   const { data } = matter(raw);
   return {
     slug,
@@ -51,6 +51,19 @@ export function publishedCases(): CaseInfo[] {
 }
 
 export const slugs = (): string[] => publishedCases().map((c) => c.slug);
+
+/**
+ * Английские версии тех же кейсов — index.en.mdx рядом с index.mdx. Слаг и порядок
+ * общие с русской версией: адрес у английской страницы тот же, только с /en/ впереди.
+ * Совпадение order проверяет tests/unit/content.test.ts, критерий AC-31.
+ */
+export function publishedCasesEn(): CaseInfo[] {
+  return publishedCases()
+    .filter((c) => existsSync(join(CASES_DIR, c.slug, 'index.en.mdx')))
+    .map((c) => read(c.slug, 'index.en.mdx'))
+    .filter((c) => !c.draft)
+    .sort((a, b) => a.order - b.order);
+}
 
 /** Сосед по порядку: пригождается тестам переходов «предыдущий / следующий». */
 export function neighbours(slug: string): { prev?: CaseInfo; next?: CaseInfo } {

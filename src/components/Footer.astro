@@ -1,6 +1,16 @@
 ---
-import { site } from '@/lib/site';
+import { site, profile } from '@/lib/site';
 import { withBase } from '@/lib/utils';
+import { defaultLocale, t, type Locale } from '@/lib/i18n';
+
+interface Props {
+  lang?: Locale;
+}
+
+const { lang = defaultLocale } = Astro.props;
+const strings = t(lang);
+const me = profile(lang);
+const cvFile = site.cvFile[lang];
 ---
 
 <!--
@@ -11,7 +21,7 @@ import { withBase } from '@/lib/utils';
 -->
 <footer class="mt-16 border-t py-10">
   <div class="mx-auto flex max-w-5xl flex-col gap-2 px-4 sm:flex-row sm:items-center sm:justify-between">
-    <p class="text-sm text-muted-foreground">{site.name} — {site.role}</p>
+    <p class="text-sm text-muted-foreground">{me.name} — {me.role}</p>
 
     <ul class="flex flex-wrap items-center gap-x-5 text-sm">
       {site.contacts.map((contact) => (
@@ -22,18 +32,20 @@ import { withBase } from '@/lib/utils';
             rel="noopener noreferrer"
             class="flex min-h-11 items-center text-muted-foreground hover:text-foreground"
           >
-            {contact.label}
+            {contact.label[lang]}
           </a>
         </li>
       ))}
-      <li>
-        <a
-          href={withBase(site.cvFile)}
-          class="flex min-h-11 items-center text-muted-foreground hover:text-foreground"
-        >
-          Резюме
-        </a>
-      </li>
+      {cvFile && (
+        <li>
+          <a
+            href={withBase(cvFile)}
+            class="flex min-h-11 items-center text-muted-foreground hover:text-foreground"
+          >
+            {strings.cvShort}
+          </a>
+        </li>
+      )}
     </ul>
   </div>
 </footer>
